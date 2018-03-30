@@ -14,7 +14,7 @@ print(df.head())
 
 forecast_col = 'Total'
 df.fillna(value=-99999, inplace=True)
-forecast_out = int(math.ceil(0.01 * len(df))) # 1% forecast
+forecast_out = int(math.ceil(0.25 * len(df))) # 1% forecast
 print (forecast_out)
 
 df['label'] = df[forecast_col].shift(-forecast_out) 

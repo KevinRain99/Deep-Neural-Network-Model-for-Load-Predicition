@@ -65,8 +65,8 @@ def neuralNetwork():
   detrended,slope,intercept = statistics.detrend(trainIndices,yTrain)
   yTrain = detrended
 
-  dimensions = [6,10,12]
-  neurons = [30,50,50]
+  dimensions = [6,10,12,48]
+  neurons = [300,500,500,500]
 
   names = []
   for x in range(len(dimensions)):
@@ -83,7 +83,7 @@ def neuralNetwork():
     xTrainRed = pca.transform(xTrain)
     xTestRed = pca.transform(xTest)
 
-    pred = fit_predict(xTrainRed,yTrain,xTestRed,40,neurons[x])
+    pred = fit_predict(xTrainRed,yTrain,xTestRed,100,neurons[x])
 
     # Add the trend back into the predictions
     trendedPred = statistics.reapplyTrend(testIndices,pred,slope,intercept)
