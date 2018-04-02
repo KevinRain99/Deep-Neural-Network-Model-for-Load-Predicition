@@ -11,6 +11,7 @@ from pybrain.structure import LinearLayer, SigmoidLayer
 from pybrain.datasets import SupervisedDataSet
 from pybrain.supervised.trainers import BackpropTrainer
 from sklearn.decomposition import PCA
+from sklearn.metrics import mean_squared_error
 
 # Neural Network load forecasting
 def neuralNetwork():
@@ -26,8 +27,8 @@ def neuralNetwork():
   for rx in range(1,sheet.nrows):
       #row = sheet.row(rx)[3:]
       #row = [row[x].value for x in range(0,len(row)-4)]
-      row = sheet.row(rx)[1:11] #including temps
-      rowy=sheet.row(rx)[10] #total of next day
+      row = sheet.row(rx)[1:12] #including temps
+      rowy=sheet.row(rx)[12] #total of next day
       row = [row[x].value for x in range(0,len(row))]
       rowy=rowy.value
       xData.append(row)
@@ -35,18 +36,20 @@ def neuralNetwork():
     #print "cutoff"+str(cutoff)
   print (xData)
   print (yData)
+  cu=len(xData)-720
   cutoff = len(xData)-30
   print(cutoff)
-  xTrain = xData[0:cutoff]
+  xTrain = xData[cu:cutoff]
   
   #print xTrain[47]
   #print xTrain
-  yTrain = yData[0:cutoff]
+  yTrain = yData[cu:cutoff]
   xTest = xData[cutoff:]
   #print cutoff
   #print xTest[0]
   yTest = yData[cutoff:]
   print (yTest)
+  
   # Fill in missing values denoted by zeroes as an average of
   # both neighbors
   statistics.estimateMissing(xTrain,0.0)
@@ -60,13 +63,13 @@ def neuralNetwork():
   indices = np.arange(len(xData))
   print ('ho')
   print (indices)
-  trainIndices = indices[0:cutoff]
+  trainIndices = indices[cu:cutoff]
   testIndices = indices[cutoff:]
   detrended,slope,intercept = statistics.detrend(trainIndices,yTrain)
   yTrain = detrended
 
-  dimensions = [7,8,10]
-  neurons = [300,500,500]
+  dimensions = [7,8,10,11]
+  neurons = [300,500,500,500]
 
   names = []
   for x in range(len(dimensions)):
@@ -90,11 +93,12 @@ def neuralNetwork():
     trendedPred = [math.exp(x) for x in trendedPred]
     # Compute the NRMSE
     err = statistics.normRmse(yTest,trendedPred)
-    
+    err2=statistics.mape(yTest,trendedPred)
     # Append computed predictions to list for classifier predictions
     preds.append(trendedPred)
 
     print "The NRMSE for the neural network is " + str(err) + "..."
+    print "The %Accuracy for the neural network is " + str((1-err2)*100) + "...\n"
   
   preds.append(yTest)
   names.append("actual")
@@ -157,7 +161,7 @@ def fit_predict(xTrain,yTrain,xTest,epochs,neurons):
   outputs = []
   for x in xTest:
     outputs.append(n.activate(x))
-
+  
   return outputs
 
 if __name__ == "__main__":
